@@ -11,7 +11,8 @@ It appends to the given files. This is messy, but I figure it will only be messy
 You can give it a list of files, and you can use flags in-between those files to alternate between modes. Filenames may include a path.
 
 Example:
-```ste-newfile -s MyStruct -flecs ECS/Systems/FlecsDrawAllMySprites -f FiniteStateMachine
+```
+ste-newfile -s MyStruct -flecs ECS/Systems/FlecsDrawAllMySprites -f FiniteStateMachine
 # -s MyStruct generates:
 # MyStruct.h
 # -flecs ECS/Systems/FlecsDrawAllMySprites generates:
