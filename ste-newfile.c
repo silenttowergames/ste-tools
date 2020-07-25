@@ -3,17 +3,50 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef enum TemplateType
+{
+    Struct,
+    FunctionsWithStruct,
+    Flecs,
+} TemplateType;
+
+const char* getSlug(const char* full)
+{
+    char* slug;
+    
+    // Get the slug
+    // AKA, everything after the last /
+    // This will tell us what to call our classes
+    int lastSlash = 0;
+    for(int j = 0; j < strlen(full); j++)
+    {
+        if(full[j] == '/')
+        {
+            lastSlash = j + 1;
+        }
+    }
+    
+    size_t sizeOfSlug = strlen(full) - lastSlash + 1;
+    slug = malloc(sizeof(char) * sizeOfSlug);
+    memcpy(slug, &full[lastSlash], sizeOfSlug * sizeof(char));
+    
+    return slug;
+}
+
 int main(int argc, char* argv[])
 {
     FILE* f;
-    char* slug;
-    char* files[3];
+    const char* slug;
+    const char* files[3];
+    const char* current;
+    // Maximum of 1k characters. That's a lot!
+    char* filename = malloc(sizeof(char) * 1000);
     
     const char* paramsFlecs = "ecs_iter_t* it";
     const char* paramsNoFlecs = "";
     const char* params = paramsNoFlecs;
     
-    const char* includesFlecs = "#include <flecs.h>\n\n";
+    const char* includesFlecs = "#include <flecs.h>\n";
     const char* includesNoFlecs = "";
     const char* includes = includesNoFlecs;
     
@@ -21,95 +54,64 @@ int main(int argc, char* argv[])
     const char* functionTypeNoFlecs = "Functions";
     const char* functionType = functionTypeNoFlecs;
     
-    int doFunctions = 0;
+    TemplateType type;
     
     for(int i = 1; i < argc; i++)
     {
-        if(strcmp("-flecs", argv[i]) == 0)
+        current = argv[i];
+        
+        // If it's a type flag, just handle that this cycle
+        if(strcmp(current, "-flecs") == 0)
         {
-            doFunctions = 2;
-            
-            params = paramsFlecs;
+            type = Flecs;
             
             includes = includesFlecs;
-            
+            params = paramsFlecs;
             functionType = functionTypeFlecs;
             
             continue;
         }
-        else if(strcmp("-f", argv[i]) == 0)
+        else if(strcmp(current, "-f") == 0)
         {
-            doFunctions = 1;
+            type = FunctionsWithStruct;
             
+            includes = includesNoFlecs;
+            params = paramsNoFlecs;
             functionType = functionTypeNoFlecs;
             
             continue;
         }
-        else if(strcmp("-s", argv[i]) == 0)
+        else if(strcmp(current, "-s") == 0)
         {
-            doFunctions = 0;
+            type = Struct;
             
             continue;
         }
         
-        // Get the slug
-        // AKA, everything after the last /
-        // This will tell us what to call our classes
-        int lastSlash = 0;
-        for(int j = 0; j < strlen(argv[i]); j++)
-        {
-            if(argv[i][j] == '/')
-            {
-                lastSlash = j + 1;
-            }
-        }
+        slug = getSlug(current);
         
-        size_t sizeOfSlug = (strlen(argv[i]) - lastSlash + 1);
-        slug = malloc(sizeof(char) * sizeOfSlug);
-        memcpy(slug, &argv[i][lastSlash], sizeOfSlug * sizeof(char));
-        
-        if(doFunctions < 2)
+        if(type == Struct || type == FunctionsWithStruct)
         {
-            files[0] = malloc(strlen(argv[i]) + 3);
-        }
-        if(doFunctions > 0)
-        {
-            files[1] = malloc(strlen(argv[i]) + 12);
-            files[2] = malloc(strlen(argv[i]) + 12);
-        }
-        
-        if(doFunctions < 2)
-        {
-            memcpy(files[0], argv[i], strlen(argv[i]));
-            memcpy(&files[0][strlen(argv[i])], ".h\0", sizeof(char) * 3);
-            f = fopen(files[0], "a");
+            sprintf(filename, "%s.h", current);
+            
+            f = fopen(filename, "a");
             fprintf(f, "#pragma once\n\ntypedef struct %s\n{\n\t// fields\n} %s;\n", slug, slug);
             fclose(f);
         }
         
-        if(doFunctions > 0)
+        if(type == FunctionsWithStruct || type == Flecs)
         {
-            memcpy(files[1], argv[i], strlen(argv[i]));
-            memcpy(&files[1][strlen(argv[i])], "Functions.h\0", sizeof(char) * 12);
-            f = fopen(files[1], "a");
-            fprintf(f, "#pragma once\n\n%svoid %s%s(%s);\n", includes, slug, functionType, params);
+            sprintf(filename, "%s%s.h", current, functionType);
+            
+            f = fopen(filename, "a");
+            fprintf(f, "#pragma once\n%s\nvoid %s%s(%s);\n", includes, slug, functionType, params);
             fclose(f);
             
-            memcpy(files[2], argv[i], strlen(argv[i]));
-            memcpy(&files[2][strlen(argv[i])], "Functions.c\0", sizeof(char) * 12);
-            f = fopen(files[2], "a");
-            fprintf(f, "#include \"%sFunctions.h\"\n\nvoid %s%s(%s)\n{\n\t// logic\n}\n", slug, slug, functionType, params);
+            sprintf(filename, "%s%s.c", current, functionType);
+            
+            f = fopen(filename, "a");
+            fprintf(f, "%s#include \"%s%s.h\"\n\nvoid %s%s(%s)\n{\n\t// logic\n}\n", includes, slug, functionType, slug, functionType, params);
             fclose(f);
-        }
-        
-        if(doFunctions < 2)
-        {
-            printf("%s\n", files[0]);
-        }
-        if(doFunctions > 0)
-        {
-            printf("%s\n", files[1]);
-            printf("%s\n", files[2]);
         }
     }
     

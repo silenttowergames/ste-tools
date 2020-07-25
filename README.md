@@ -4,7 +4,13 @@ This repository is for hosting little tools developed for the purpose of making 
 
 ## ste-newfile
 
-A console-based application for generating code files quick. It takes three flags:
+A console-based application for generating code files quick.
+
+It appends to the given files. This is messy, but I figure it will only be messy in an instance where you are in danger of losing work. It's an easy mess to clean up, relative to possibly losing progress.
+
+You can give it a list of files, and you can use flags in-between those files to alternate between modes.
+
+It takes three flags for mode:
 
 ### -s
 
