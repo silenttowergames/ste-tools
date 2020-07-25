@@ -19,7 +19,8 @@ Example:
 # ECS/Systems/FlecsDrawAllMySpritesSystem.c
 # -f generates:
 # FiniteStateMachineFunctions.h
-# FiniteStateMachineFunctions.c```
+# FiniteStateMachineFunctions.c
+```
 
 It takes three flags for mode:
 
