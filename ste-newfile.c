@@ -17,6 +17,10 @@ int main(int argc, char* argv[])
     const char* includesNoFlecs = "";
     const char* includes = includesNoFlecs;
     
+    const char* functionTypeFlecs = "System";
+    const char* functionTypeNoFlecs = "Functions";
+    const char* functionType = functionTypeNoFlecs;
+    
     int doFunctions = 0;
     
     for(int i = 1; i < argc; i++)
@@ -29,11 +33,15 @@ int main(int argc, char* argv[])
             
             includes = includesFlecs;
             
+            functionType = functionTypeFlecs;
+            
             continue;
         }
         else if(strcmp("-f", argv[i]) == 0)
         {
             doFunctions = 1;
+            
+            functionType = functionTypeNoFlecs;
             
             continue;
         }
@@ -84,13 +92,13 @@ int main(int argc, char* argv[])
             memcpy(files[1], argv[i], strlen(argv[i]));
             memcpy(&files[1][strlen(argv[i])], "Functions.h\0", sizeof(char) * 12);
             f = fopen(files[1], "a");
-            fprintf(f, "#pragma once\n\n%svoid %sFunction(%s);\n", includes, slug, params);
+            fprintf(f, "#pragma once\n\n%svoid %s%s(%s);\n", includes, slug, functionType, params);
             fclose(f);
             
             memcpy(files[2], argv[i], strlen(argv[i]));
             memcpy(&files[2][strlen(argv[i])], "Functions.c\0", sizeof(char) * 12);
             f = fopen(files[2], "a");
-            fprintf(f, "#include \"%sFunctions.h\"\n\nvoid %sFunction(%s)\n{\n\t// logic\n}\n", slug, slug, params);
+            fprintf(f, "#include \"%sFunctions.h\"\n\nvoid %s%s(%s)\n{\n\t// logic\n}\n", slug, slug, functionType, params);
             fclose(f);
         }
         
