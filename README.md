@@ -8,7 +8,18 @@ A console-based application for generating code files quick.
 
 It appends to the given files. This is messy, but I figure it will only be messy in an instance where you are in danger of losing work. It's an easy mess to clean up, relative to possibly losing progress.
 
-You can give it a list of files, and you can use flags in-between those files to alternate between modes.
+You can give it a list of files, and you can use flags in-between those files to alternate between modes. Filenames may include a path.
+
+Example:
+```ste-newfile -s MyStruct -flecs ECS/Systems/FlecsDrawAllMySprites -f FiniteStateMachine
+# -s MyStruct generates:
+# MyStruct.h
+# -flecs ECS/Systems/FlecsDrawAllMySprites generates:
+# ECS/Systems/FlecsDrawAllMySpritesSystem.h
+# ECS/Systems/FlecsDrawAllMySpritesSystem.c
+# -f generates:
+# FiniteStateMachineFunctions.h
+# FiniteStateMachineFunctions.c```
 
 It takes three flags for mode:
 
