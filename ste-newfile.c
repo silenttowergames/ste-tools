@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
             sprintf(filename, "%s%s.h", current, functionType);
             
             f = fopen(filename, "a");
-            fprintf(f, "#pragma once\n%s\nvoid %s%s(%s);\n", includes, slug, functionType, params);
+            fprintf(f, "#pragma once\n\n#include\"%s.h\"\n%s\nvoid %s%s(%s);\n", slug, includes, slug, functionType, params);
             fclose(f);
             
             sprintf(filename, "%s%s.c", current, functionType);
